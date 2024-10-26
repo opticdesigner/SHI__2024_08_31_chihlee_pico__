@@ -10,7 +10,7 @@ led->gpio15
 from machine import Timer,ADC,Pin,PWM,RTC
 import binascii
 from umqtt.simple import MQTTClient
-import tools
+import tools,config
 
 
 def do_thing(t):
@@ -22,12 +22,12 @@ def do_thing(t):
     conversion_factor = 3.3 / (65535)
     reading = adc.read_u16() * conversion_factor
     temperature = round(27 - (reading - 0.706)/0.001721,2) 
-    print(f'溫度:{temperature}')
+    #print(f'溫度:{temperature}')
     mqtt.publish('SA-01/TEMPERATURE', f'{temperature}')
     adc_value = adc_light.read_u16()
-    print(f'光線:{adc_value}')
+    #print(f'光線:{adc_value}')
     line_state = 0 if adc_value < 3500 else 1
-    print(f'光線:{line_state}')
+    #print(f'光線:{line_state}')
     mqtt.publish('SA-01/LINE_LEVEL', f'{line_state}')
     
     
@@ -40,12 +40,18 @@ def do_thing1(t):
     duty = adc1.read_u16()
     pwm.duty_u16(duty)
     light_level = round(duty/65535*10)
-    print(f'可變電阻:{light_level}')
+    #print(f'可變電阻:{light_level}')
     mqtt.publish('SA-01/LED_LEVEL', f'{light_level}')
     
 
 def main():
-    pass
+    global blynk_mqtt
+    print(config.BLYNK_MQTT_BROKER)
+    print(config.BLYNK_TEMPLATE_ID)
+    print(config.BLYNK_AUTH_TOKEN)
+    blynk_mqtt = MQTTClient(config.BLYNK_TEMPLATE_ID, config.BLYNK_MQTT_BROKER,user='device',password=config.BLYNK_AUTH_TOKEN)
+    blynk_mqtt.connect()
+    
         
 
 if __name__ == '__main__':
@@ -67,6 +73,6 @@ if __name__ == '__main__':
         mqtt = MQTTClient(CLIENT_ID, SERVER,user='pi',password='raspberry')
         mqtt.connect()
         t1 = Timer(period=2000, mode=Timer.PERIODIC, callback=do_thing)
-        t2 = Timer(period=500, mode=Timer.PERIODIC, callback=do_thing1)   
-    
+        t2 = Timer(period=500, mode=Timer.PERIODIC, callback=do_thing1)
+    blynk_mqtt = None    
     main()

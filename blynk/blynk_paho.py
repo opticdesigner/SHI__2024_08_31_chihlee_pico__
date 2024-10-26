@@ -7,7 +7,7 @@
 
 import time
 import ssl
-import blynk.config1 as config1, demo
+import blynk.config as config, demo
 
 from paho.mqtt.client import Client, CallbackAPIVersion
 from urllib.parse import urlparse
@@ -47,8 +47,8 @@ def main():
     mqtt.tls_set(tls_version=ssl.PROTOCOL_TLSv1_2)
     mqtt.on_connect = on_connect
     mqtt.on_message = on_message
-    mqtt.username_pw_set("device", config1.BLYNK_AUTH_TOKEN)
-    mqtt.connect_async(config1.BLYNK_MQTT_BROKER, 8883, 45)
+    mqtt.username_pw_set("device", config.BLYNK_AUTH_TOKEN)
+    mqtt.connect_async(config.BLYNK_MQTT_BROKER, 8883, 45)
     mqtt.loop_start()
 
     while True:
